@@ -2,6 +2,7 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
+import uuid
 
 
 class Migration(migrations.Migration):
@@ -15,14 +16,14 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Club',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('name', models.CharField(max_length=255, unique=True)),
             ],
         ),
         migrations.CreateModel(
             name='ClubParticipation',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('disqualified', models.BooleanField(default=False)),
                 ('club', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='db.club')),
             ],
@@ -30,14 +31,14 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Competition',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('name', models.CharField(max_length=255, unique=True)),
             ],
         ),
         migrations.CreateModel(
             name='Event',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('name', models.CharField(max_length=255)),
                 ('competition', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='db.competition')),
             ],
@@ -45,14 +46,14 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Season',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('name', models.CharField(max_length=255, unique=True)),
             ],
         ),
         migrations.CreateModel(
             name='SeasonEvent',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('competition_overall_map_from_min', models.DecimalField(decimal_places=6, default=0.0, max_digits=15)),
                 ('competition_overall_map_from_max', models.DecimalField(decimal_places=6, max_digits=15)),
                 ('competition_overall_map_to_min', models.DecimalField(decimal_places=6, default=0.0, max_digits=15)),
@@ -70,7 +71,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Team',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('name', models.CharField(max_length=255)),
                 ('disqualified', models.BooleanField(default=False)),
                 ('club', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='db.clubparticipation')),
@@ -79,7 +80,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TeamTimedScore',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('time', models.DecimalField(decimal_places=6, max_digits=15)),
                 ('errors', models.DecimalField(decimal_places=6, max_digits=15)),
                 ('event', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='db.seasonevent')),
@@ -89,7 +90,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TeamPointScore',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('points', models.DecimalField(decimal_places=6, max_digits=15)),
                 ('event', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='db.seasonevent')),
                 ('team', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='db.team')),
@@ -98,7 +99,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TeamIndividualScore',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('name', models.CharField(max_length=255)),
                 ('points', models.DecimalField(decimal_places=6, max_digits=15)),
                 ('event', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='db.seasonevent')),
@@ -108,7 +109,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='SeasonCompetition',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('season_overall_map_from_min', models.DecimalField(decimal_places=6, default=0.0, max_digits=15)),
                 ('season_overall_map_from_max', models.DecimalField(decimal_places=6, max_digits=15)),
                 ('season_overall_map_to_min', models.DecimalField(decimal_places=6, default=0.0, max_digits=15)),
@@ -120,7 +121,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ClubTimedScore',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('time', models.DecimalField(decimal_places=6, max_digits=15)),
                 ('errors', models.DecimalField(decimal_places=6, max_digits=15)),
                 ('club', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='db.clubparticipation')),
@@ -130,7 +131,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ClubPointScore',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('points', models.DecimalField(decimal_places=6, max_digits=15)),
                 ('club', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='db.clubparticipation')),
                 ('event', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='db.seasonevent')),
@@ -144,7 +145,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ClubIndividualScore',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('name', models.CharField(max_length=255)),
                 ('points', models.DecimalField(decimal_places=6, max_digits=15)),
                 ('club', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='db.clubparticipation')),

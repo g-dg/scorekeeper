@@ -1,7 +1,9 @@
 from django.db import models
+import uuid
 
 # defines a club (group of teams)
 class Club(models.Model):
+	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	name = models.CharField(max_length=255, unique=True)
 
 	class Meta():
@@ -13,6 +15,7 @@ class Club(models.Model):
 
 # defines a season
 class Season(models.Model):
+	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	name = models.CharField(max_length=255, unique=True)
 
 	class Meta():
@@ -24,6 +27,7 @@ class Season(models.Model):
 
 # defines a competition
 class Competition(models.Model):
+	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	name = models.CharField(max_length=255, unique=True)
 
 	class Meta():
@@ -35,6 +39,7 @@ class Competition(models.Model):
 
 # defines each competition in a particular season
 class SeasonCompetition(models.Model):
+	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	season = models.ForeignKey(Season, on_delete=models.CASCADE)
 	competition = models.ForeignKey(Competition, on_delete=models.CASCADE)
 	season_overall_map_from_min = models.DecimalField(max_digits=15, decimal_places=6, default=0.0)
@@ -53,6 +58,7 @@ class SeasonCompetition(models.Model):
 
 # defines which competition seasons each club competes in
 class ClubParticipation(models.Model):
+	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	club = models.ForeignKey(Club, on_delete=models.CASCADE)
 	competition = models.ForeignKey(SeasonCompetition, on_delete=models.CASCADE)
 	disqualified = models.BooleanField(default=False)
@@ -68,6 +74,7 @@ class ClubParticipation(models.Model):
 
 # defines a team
 class Team(models.Model):
+	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	name = models.CharField(max_length=255)
 	club = models.ForeignKey(ClubParticipation, on_delete=models.CASCADE)
 	disqualified = models.BooleanField(default=False)
@@ -83,6 +90,7 @@ class Team(models.Model):
 
 # defines an event in a competition
 class Event(models.Model):
+	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	name = models.CharField(max_length=255)
 	competition = models.ForeignKey(Competition, on_delete=models.CASCADE)
 
@@ -105,6 +113,7 @@ class SeasonEvent(models.Model):
 		TIMED_CLUB = 4 # one set of points per club, made by combining speed and accuracy points
 		TIMED_TEAM = 5 # one set of points per team, made by combining speed and accuracy points
 
+	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	event = models.ForeignKey(Event, on_delete=models.CASCADE)
 	season = models.ForeignKey(Season, on_delete=models.CASCADE)
 	competition_overall_map_from_min = models.DecimalField(max_digits=15, decimal_places=6, default=0.0)
@@ -128,6 +137,7 @@ class SeasonEvent(models.Model):
 
 
 class ClubPointScore(models.Model):
+	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	event = models.ForeignKey(SeasonEvent, on_delete=models.CASCADE)
 	club = models.ForeignKey(ClubParticipation, on_delete=models.CASCADE)
 	points = models.DecimalField(max_digits=15, decimal_places=6)
@@ -142,6 +152,7 @@ class ClubPointScore(models.Model):
 
 
 class TeamPointScore(models.Model):
+	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	event = models.ForeignKey(SeasonEvent, on_delete=models.CASCADE)
 	team = models.ForeignKey(Team, on_delete=models.CASCADE)
 	points = models.DecimalField(max_digits=15, decimal_places=6)
@@ -156,6 +167,7 @@ class TeamPointScore(models.Model):
 
 
 class ClubTimedScore(models.Model):
+	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	event = models.ForeignKey(SeasonEvent, on_delete=models.CASCADE)
 	club = models.ForeignKey(ClubParticipation, on_delete=models.CASCADE)
 	time = models.DecimalField(max_digits=15, decimal_places=6) # time in seconds
@@ -171,6 +183,7 @@ class ClubTimedScore(models.Model):
 
 
 class TeamTimedScore(models.Model):
+	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	event = models.ForeignKey(SeasonEvent, on_delete=models.CASCADE)
 	team = models.ForeignKey(Team, on_delete=models.CASCADE)
 	time = models.DecimalField(max_digits=15, decimal_places=6) # time in seconds
@@ -186,6 +199,7 @@ class TeamTimedScore(models.Model):
 
 
 class ClubIndividualScore(models.Model):
+	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	event = models.ForeignKey(SeasonEvent, on_delete=models.CASCADE)
 	club = models.ForeignKey(ClubParticipation, on_delete=models.CASCADE)
 	name = models.CharField(max_length=255)
@@ -201,6 +215,7 @@ class ClubIndividualScore(models.Model):
 
 
 class TeamIndividualScore(models.Model):
+	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	event = models.ForeignKey(SeasonEvent, on_delete=models.CASCADE)
 	team = models.ForeignKey(Team, on_delete=models.CASCADE)
 	name = models.CharField(max_length=255)
