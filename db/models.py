@@ -63,7 +63,7 @@ class ClubParticipation(models.Model):
 		]
 
 	def __str__(self):
-		return '{} | {}'.format(self.club, self.competition)
+		return '{} | {}'.format(self.competition, self.club)
 
 
 # defines a team
