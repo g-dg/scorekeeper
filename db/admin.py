@@ -44,33 +44,3 @@ class EventAdmin(admin.ModelAdmin):
 @admin.register(SeasonEvent)
 class SeasonEventAdmin(admin.ModelAdmin):
 	ordering = ['season__name', 'event__competition__name', 'event__name']
-
-
-# @admin.register(ClubPointScore)
-# class ClubPointScoreAdmin(admin.ModelAdmin):
-# 	pass
-
-
-# @admin.register(TeamPointScore)
-# class TeamPointScoreAdmin(admin.ModelAdmin):
-# 	pass
-
-
-# @admin.register(ClubTimedScore)
-# class ClubTimedScoreAdmin(admin.ModelAdmin):
-# 	pass
-
-
-# @admin.register(TeamTimedScore)
-# class TeamTimedScoreAdmin(admin.ModelAdmin):
-# 	pass
-
-
-# @admin.register(ClubIndividualScore)
-# class ClubIndividualScoreAdmin(admin.ModelAdmin):
-# 	pass
-
-
-# @admin.register(TeamIndividualScore)
-# class TeamIndividualScoreAdmin(admin.ModelAdmin):
-# 	pass
