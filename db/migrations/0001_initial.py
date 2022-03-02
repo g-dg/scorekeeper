@@ -40,6 +40,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('name', models.CharField(max_length=255)),
+                ('type', models.IntegerField(choices=[(0, 'Club Points'), (1, 'Team Points'), (2, 'Club Individual Points'), (3, 'Team Individual Points'), (4, 'Club Timed'), (5, 'Team Timed')], default=1)),
                 ('competition', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='db.competition')),
             ],
         ),

@@ -90,8 +90,17 @@ class Team(models.Model):
 
 # defines an event in a competition
 class Event(models.Model):
+	class EventType(models.IntegerChoices):
+		POINTS_CLUB = (0, 'Club Points') # one set of points per club
+		POINTS_TEAM = (1, 'Team Points') # one set of points per team
+		INDIVIDUAL_POINTS_CLUB = (2, 'Club Individual Points') # multiple sets of points per club, no team scores (if no entries, then 0 points for event, competition, and season)
+		INDIVIDUAL_POINTS_TEAM = (3, 'Team Individual Points') # multiple sets of points per team (if no entries, then 0 points for event, competition, and season)
+		TIMED_CLUB = (4, 'Club Timed') # one set of points per club, made by combining speed and accuracy points
+		TIMED_TEAM = (5, 'Team Timed') # one set of points per team, made by combining speed and accuracy points
+
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	name = models.CharField(max_length=255)
+	type = models.IntegerField(choices=EventType.choices, default=EventType.POINTS_TEAM)
 	competition = models.ForeignKey(Competition, on_delete=models.CASCADE)
 
 	class Meta():
@@ -105,14 +114,6 @@ class Event(models.Model):
 
 # defines an event of a competition in a particular season
 class SeasonEvent(models.Model):
-	class EventType(models.IntegerChoices):
-		POINTS_CLUB = 0 # one set of points per club
-		POINTS_TEAM = 1 # one set of points per team
-		INDIVIDUAL_POINTS_CLUB = 2 # multiple sets of points per club, no team scores (if no entries, then 0 points for event, competition, and season)
-		INDIVIDUAL_POINTS_TEAM = 3 # multiple sets of points per team (if no entries, then 0 points for event, competition, and season)
-		TIMED_CLUB = 4 # one set of points per club, made by combining speed and accuracy points
-		TIMED_TEAM = 5 # one set of points per team, made by combining speed and accuracy points
-
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	event = models.ForeignKey(Event, on_delete=models.CASCADE)
 	season = models.ForeignKey(Season, on_delete=models.CASCADE)
