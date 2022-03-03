@@ -1,5 +1,7 @@
+from decimal import Decimal, InvalidOperation
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.http import JsonResponse, Http404, HttpResponseNotFound
+import json
 
 from db.models import ClubIndividualScore, ClubParticipation, ClubPointScore, ClubTimedScore, Season, SeasonCompetition, SeasonEvent, Team, TeamIndividualScore, TeamPointScore, TeamTimedScore
 
@@ -8,7 +10,7 @@ def authorize(request):
         raise PermissionDenied()
 
 
-def getSeasons(request):
+def seasonView(request):
     authorize(request)
     seasons = []
     for s in Season.objects.order_by("name"):
@@ -19,7 +21,7 @@ def getSeasons(request):
     return JsonResponse(seasons, safe=False)
 
 
-def getSeasonCompetitions(request, season_id):
+def competitionView(request, season_id):
     authorize(request)
     competitions = []
     for c in SeasonCompetition.objects.filter(season=season_id):
@@ -30,7 +32,7 @@ def getSeasonCompetitions(request, season_id):
     return JsonResponse(competitions, safe=False)
 
 
-def getSeasonCompetitionClubs(request, season_id, competition_id):
+def clubView(request, season_id, competition_id):
     authorize(request)
     clubs = []
     for p in ClubParticipation.objects.filter(competition__season=season_id, competition__competition=competition_id):
@@ -41,7 +43,7 @@ def getSeasonCompetitionClubs(request, season_id, competition_id):
     return JsonResponse(clubs, safe=False)
 
 
-def getSeasonCompetitionClubTeams(request, season_id, competition_id, club_id):
+def teamView(request, season_id, competition_id, club_id):
     authorize(request)
     teams = []
     for t in Team.objects.filter(club__competition__season=season_id, club__competition__competition=competition_id, club__club=club_id):
@@ -52,7 +54,7 @@ def getSeasonCompetitionClubTeams(request, season_id, competition_id, club_id):
     return JsonResponse(teams, safe=False)
 
 
-def getSeasonCompetitionEvents(request, season_id, competition_id):
+def eventView(request, season_id, competition_id):
     authorize(request)
     events = []
     for e in SeasonEvent.objects.filter(season=season_id, event__competition=competition_id):
@@ -68,7 +70,7 @@ def getSeasonCompetitionEvents(request, season_id, competition_id):
     return JsonResponse(events, safe=False)
 
 
-def getClubScores(request, season_id, competition_id, event_id, club_id):
+def clubScoreView(request, season_id, competition_id, event_id, club_id):
     authorize(request)
     seasonEvent = None
     clubParticipation = None
@@ -77,9 +79,9 @@ def getClubScores(request, season_id, competition_id, event_id, club_id):
         clubParticipation = ClubParticipation.objects.get(competition__season=season_id, competition__competition=competition_id, club=club_id)
     except ObjectDoesNotExist:
         return HttpResponseNotFound()
-
     eventType = seasonEvent.event.type
-    def clubPoints():
+
+    def getClubPoints():
         try:
             score = ClubPointScore.objects.get(event=seasonEvent.id, club=clubParticipation.id)
             return {
@@ -89,7 +91,7 @@ def getClubScores(request, season_id, competition_id, event_id, club_id):
             return {
                 'points': None
             }
-    def clubIndividualPoints():
+    def getClubIndividualPoints():
         scores = []
         for s in ClubIndividualScore.objects.filter(event=seasonEvent.id, club=clubParticipation.id):
             scores.append({
@@ -97,7 +99,7 @@ def getClubScores(request, season_id, competition_id, event_id, club_id):
                 'points': s.points,
             })
         return scores
-    def clubTimed():
+    def getClubTimed():
         try:
             score = ClubTimedScore.objects.get(event=seasonEvent.id, club=clubParticipation.id)
             return {
@@ -109,14 +111,55 @@ def getClubScores(request, season_id, competition_id, event_id, club_id):
                 'time': None,
                 'errors': None,
             }
+
+    def setClubPoints(score):
+        points = score['points']
+        if points != None:
+            ClubPointScore.objects.update_or_create(
+                event=seasonEvent.id,
+                club=clubParticipation.id,
+                defaults={'points': Decimal(points)},
+            )
+        else:
+            ClubPointScore.objects.filter(
+                event=seasonEvent.id,
+                club=clubParticipation.id,
+            ).delete()
+    def setClubIndividualPoints():
+        raise NotImplementedError
+    def setClubTimed():
+        time = score['time']
+        errors = score['errors']
+        if time != None and errors != None:
+            ClubTimedScore.objects.update_or_create(
+                event=seasonEvent.id,
+                club=clubParticipation.id,
+                defaults={'time': Decimal(time), 'errors': Decimal(errors)},
+            )
+        elif time == None and errors == None:
+            ClubTimedScore.objects.filter(
+                event=seasonEvent.id,
+                club=clubParticipation.id,
+            ).delete()
+
     def invalid():
         raise Http404
-    result = [clubPoints, invalid, clubIndividualPoints, invalid, clubTimed, invalid][eventType]()
 
-    return JsonResponse(result, safe=False)
+    if request.method != 'POST':
+        result = [getClubPoints, invalid, getClubIndividualPoints, invalid, getClubTimed, invalid][eventType]()
+        return JsonResponse(result, safe=False)
+    else:
+        try:
+            score = json.loads(request.body.decode('utf-8'))
+            [setClubPoints, invalid, setClubIndividualPoints, invalid, setClubTimed, invalid][eventType](score)
+            return JsonResponse(True, safe=False)
+        except:
+            response = JsonResponse(False, safe=False)
+            response.status_code = 400
+            return response
 
 
-def getTeamScores(request, season_id, competition_id, event_id, club_id, team_id):
+def teamScoreView(request, season_id, competition_id, event_id, club_id, team_id):
     authorize(request)
     seasonEvent = None
     team = None
@@ -125,9 +168,9 @@ def getTeamScores(request, season_id, competition_id, event_id, club_id, team_id
         team = Team.objects.get(id=team_id, club__competition__season=season_id, club__competition__competition=competition_id)
     except ObjectDoesNotExist:
         return HttpResponseNotFound()
-
     eventType = seasonEvent.event.type
-    def teamPoints():
+
+    def getTeamPoints():
         try:
             score = TeamPointScore.objects.get(event=seasonEvent.id, team=team.id)
             return {
@@ -137,7 +180,7 @@ def getTeamScores(request, season_id, competition_id, event_id, club_id, team_id
             return {
                 'points': None
             }
-    def teamIndividualPoints():
+    def getTeamIndividualPoints():
         scores = []
         for s in TeamIndividualScore.objects.filter(event=seasonEvent.id, team=team.id):
             scores.append({
@@ -145,7 +188,7 @@ def getTeamScores(request, season_id, competition_id, event_id, club_id, team_id
                 'points': s.points,
             })
         return scores
-    def teamTimed():
+    def getTeamTimed():
         try:
             score = TeamTimedScore.objects.get(event=seasonEvent.id, team=team.id)
             return {
@@ -157,9 +200,50 @@ def getTeamScores(request, season_id, competition_id, event_id, club_id, team_id
                 'time': None,
                 'errors': None,
             }
+
+    def setTeamPoints(score):
+        points = score['points']
+        if points != None:
+            TeamPointScore.objects.update_or_create(
+                event=seasonEvent.id,
+                team=team.id,
+                defaults={'points': Decimal(points)},
+            )
+        else:
+            TeamPointScore.objects.filter(
+                event=seasonEvent.id,
+                team=team.id,
+            ).delete()
+    def setTeamIndividualPoints():
+        raise NotImplementedError
+    def setTeamTimed():
+        time = score['time']
+        errors = score['errors']
+        if time != None and errors != None:
+            TeamTimedScore.objects.update_or_create(
+                event=seasonEvent.id,
+                team=team.id,
+                defaults={'time': Decimal(time), 'errors': Decimal(errors)}
+            )
+        elif time == None and errors == None:
+            TeamTimedScore.objects.filter(
+                event=seasonEvent.id,
+                team=team.id,
+            ).delete()
+
     def invalid():
         raise Http404
-    result = [invalid, teamPoints, invalid, teamIndividualPoints, invalid, teamTimed][eventType]()
 
-    return JsonResponse(result, safe=False)
+    if request.method != 'POST':
+        result = [invalid, getTeamPoints, invalid, getTeamIndividualPoints, invalid, getTeamTimed][eventType]()
+        return JsonResponse(result, safe=False)
 
+    else:
+        try:
+            score = json.loads(request.body.decode('utf-8'))
+            [invalid, setTeamPoints, invalid, setTeamIndividualPoints, invalid, setTeamTimed][eventType](score)
+            return JsonResponse(True, safe=False)
+        except:
+            response = JsonResponse(False, safe=False)
+            response.status_code = 400
+            return response
